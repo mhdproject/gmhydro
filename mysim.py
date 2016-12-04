@@ -14,6 +14,8 @@ class mysim(object):
         self.nx = 10
         self.nvar = 3
         self.unk = np.ndarray(shape=(self.nvar, self.nx), dtype=float)
+        self.unk_n = np.empty_like(self.unk)
+        self.flux = np.empty_like(self.unk)
         print("test")
         self.fig, (self.ax1, self.ax2) = plt.subplots(2, 1)
         plt.show(False)
@@ -34,23 +36,24 @@ class mysim(object):
         rho = self.unk[0, :]
         v1 = self.unk[1, :]
         p = self.unk[2, :]
-        self.mass_flux = rho * v1
-        self.mom_flux = rho * v1 * v1 + p
-        self.en_flux = rho * v1 ^ 3 + v1 * p
+        self.flux[0,:] = rho * v1
+        self.flux[1,:] = rho * v1 * v1 + p
+        self.flux[2,:] = 0.5*rho * v1 ^ 3 + v1 * p
 
     def time_advance(self):
-        self.unk_n = self.unk
+        for i in range(0, self.nx):
+            self.unk_n[:,i] = 0.5*(self.unk[:,i-1] + self.unk[:,i+1]) - self.flux[:,i+1]
 
     def main_loop(self):
         self.set_initial_conditions()
         for step in range(0, 10):
+            print ("Timestep: ", step)
             self.time_advance()
             self.plot_all()
         pass
 
     def plot_all(self):
         rho = self.unk[0, :]
-        print("plotting")
         plt.subplot
         pts = self.ax1.plot(rho)
         pts = self.ax2.plot(rho)
