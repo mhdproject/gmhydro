@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import time
 
 
-class mysim(object):
+class SimulationHydro(object):
     def __init__(self):
         self.nx = 10
         self.nvar = 3
@@ -36,18 +36,18 @@ class mysim(object):
         rho = self.unk[0, :]
         v1 = self.unk[1, :]
         p = self.unk[2, :]
-        self.flux[0,:] = rho * v1
-        self.flux[1,:] = rho * v1 * v1 + p
-        self.flux[2,:] = 0.5*rho * v1 ^ 3 + v1 * p
+        self.flux[0, :] = rho * v1
+        self.flux[1, :] = rho * v1 * v1 + p
+        self.flux[2, :] = 0.5 * rho * v1 ^ 3 + v1 * p
 
     def time_advance(self):
         for i in range(0, self.nx):
-            self.unk_n[:,i] = 0.5*(self.unk[:,i-1] + self.unk[:,i+1]) - self.flux[:,i+1]
+            self.unk_n[:, i] = 0.5 * (self.unk[:, i - 1] + self.unk[:, i + 1]) - self.flux[:, i + 1]
 
     def main_loop(self):
         self.set_initial_conditions()
         for step in range(0, 10):
-            print ("Timestep: ", step)
+            print("Timestep: ", step)
             self.time_advance()
             self.plot_all()
         pass
@@ -62,4 +62,4 @@ class mysim(object):
 
 
 if __name__ == '__main__':
-    a = mysim()
+    a = SimulationHydro()
