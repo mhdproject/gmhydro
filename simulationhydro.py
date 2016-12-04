@@ -54,7 +54,6 @@ class SimulationHydro(object):
 
     def plot_all(self):
         rho = self.unk[0, :]
-        plt.subplot
         pts = self.ax1.plot(rho)
         pts = self.ax2.plot(rho)
         plt.pause(0.05)
