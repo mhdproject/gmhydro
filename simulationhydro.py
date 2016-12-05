@@ -41,7 +41,7 @@ class SimulationHydro(object):
         self.flux[2, :] = 0.5 * rho * v1 ^ 3 + v1 * p
 
     def time_advance(self):
-        for i in range(1, self.nx-1):
+        for i in range(1, self.nx - 1):
             self.unk_n[:, i] = 0.5 * (self.unk[:, i - 1] + self.unk[:, i + 1]) - self.flux[:, i + 1]
 
     def main_loop(self):
