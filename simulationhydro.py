@@ -9,19 +9,23 @@ import matplotlib.pyplot as plt
 import time
 
 
-class Mesh(object):
+class ComputationalGrid(object):
     def __init__(self):
         self.nx = 50
 
 
-class Plotter(object):
+class DataPlotter(object):
     def __init__(self):
+        self.fig, (self.ax1, self.ax2, self.ax3) = plt.subplots(3, 1)
+        plt.show(False)
+        plt.draw()
         pass
+
 
 class SimulationHydro(object):
     def __init__(self):
-        self.grid=Mesh()
-        #self.grid.nx = 50
+        self.grid = ComputationalGrid()
+        # self.grid.nx = 50
         self.dx = 1. / self.grid.nx
         self.steps = 10
         self.step = 0
@@ -34,9 +38,8 @@ class SimulationHydro(object):
         self.flux = np.empty_like(self.unk)
         self.sound_speed = np.empty_like(self.unk)
         print("test")
-        self.fig, (self.ax1, self.ax2, self.ax3) = plt.subplots(3, 1)
-        plt.show(False)
-        plt.draw()
+        self.plotter = DataPlotter()
+
         self.main_loop()
         time.sleep(10)
         pass
@@ -65,7 +68,22 @@ class SimulationHydro(object):
         self.sound_speed = np.sqrt(self.gamma * p / rho)
 
     def riemann_solver(self):
-        pass;
+        # intermeditae_state
+        # roe average
+        pl = prim[:, i]
+        pr = prim[:, i + 1]
+        roe_ave = np.sqrt(pl * pr)
+        rho_roe = roe_ave[0]
+        v_roe = roe_ave[1]
+        p_roe = roe_ave[2]
+        cs = np.sqrt(self.gamma * p_roe / rho_roe)
+        self.ev[0] = v_roe - cs
+        self.ev[1] = v_roe
+        self.ev[2] = v_roe + cs
+
+        for i in range(0,3)
+            if (self.ev[i] < 0):
+                # add solution to flux
 
     def get_max_speed(self):
         self.get_sound_speed()
@@ -122,14 +140,14 @@ class SimulationHydro(object):
         rho = self.unk[0, :]
         vel = self.unk[1, :] / rho
         p = self.unk[2, :]
-        self.ax1.cla()
-        pts = self.ax1.plot(rho)
-        self.ax2.cla()
-        pts = self.ax2.plot(vel)
-        self.ax3.cla()
-        pts = self.ax3.plot(p)
+        self.plotter.ax1.cla()
+        pts = self.plotter.ax1.plot(rho)
+        self.plotter.ax2.cla()
+        pts = self.plotter.ax2.plot(vel)
+        self.plotter.ax3.cla()
+        pts = self.plotter.ax3.plot(p)
         plt.pause(0.05)
-        self.fig.canvas.draw()
+        self.plotter.fig.canvas.draw()
         plt.savefig('output' + str(self.step) + '.png')
 
 
