@@ -14,17 +14,22 @@ class Mesh(object):
         self.nx = 50
 
 
+class Plotter(object):
+    def __init__(self):
+        pass
+
 class SimulationHydro(object):
     def __init__(self):
-        self.nx = 50
-        self.dx = 1. / self.nx
+        self.grid=Mesh()
+        #self.grid.nx = 50
+        self.dx = 1. / self.grid.nx
         self.steps = 10
         self.step = 0
         self.dtdx = 1.0
         self.nvar = 3
         self.cfl = 0.5
         self.gamma = 7. / 5.
-        self.unk = np.ndarray(shape=(self.nvar, self.nx), dtype=float)
+        self.unk = np.ndarray(shape=(self.nvar, self.grid.nx), dtype=float)
         self.unk_n = np.empty_like(self.unk)
         self.flux = np.empty_like(self.unk)
         self.sound_speed = np.empty_like(self.unk)
@@ -37,7 +42,7 @@ class SimulationHydro(object):
         pass
 
     def set_initial_conditions(self):
-        nx = self.nx
+        nx = self.grid.nx
         rho = 1.
         vx = 0
         p = 1.
@@ -58,6 +63,9 @@ class SimulationHydro(object):
         e_int = e_tot - ke
         p = e_int * (self.gamma - 1)
         self.sound_speed = np.sqrt(self.gamma * p / rho)
+
+    def riemann_solver(self):
+        pass;
 
     def get_max_speed(self):
         self.get_sound_speed()
@@ -90,7 +98,7 @@ class SimulationHydro(object):
 
     def time_advance(self):
         self.get_flux()
-        for i in range(1, self.nx - 1):
+        for i in range(1, self.grid.nx - 1):
             self.unk_n[:, i] = 0.5 * (self.unk[:, i - 1] + self.unk[:, i + 1]) - self.cfl * self.dtdx * (
                 self.flux[:, i + 1] - self.flux[:, i - 1])
 
@@ -98,12 +106,12 @@ class SimulationHydro(object):
         self.unk = self.unk_n
 
     def main_loop(self):
-        info_str="a"
+        info_str = "a"
         self.set_initial_conditions()
         for self.step in range(0, self.steps):
             self.get_max_speed()
             info_str = "Timestep =" + str(self.step)
-            info_str += ", cfl=" + str (self.dtdx)
+            info_str += ", cfl=" + str(self.dtdx)
             info_str += ", dt=%4.1e " % (self.dt)
             print(info_str)
             self.time_advance()
@@ -122,7 +130,7 @@ class SimulationHydro(object):
         pts = self.ax3.plot(p)
         plt.pause(0.05)
         self.fig.canvas.draw()
-        plt.savefig('output'+str(self.step)+'.png')
+        plt.savefig('output' + str(self.step) + '.png')
 
 
 if __name__ == '__main__':
