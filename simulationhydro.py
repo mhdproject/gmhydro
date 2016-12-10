@@ -71,18 +71,15 @@ class SimulationHydro(object):
         rho_r = unk[0]
         v_r = unk[1]
         etot_r = unk[2]
-        esp_r = etot_r / rho_r
         p_r = (self.gamma - 1) * (etot_r - (rho_r * v_r ^ 2) / 2)
-        h_r = (e_tot_r + p_r) / rho_r
+        h_r = (etot_r + p_r) / rho_r
         return v_r, p_r, h_r
 
-    def riemann_solver(self):
+    def riemann_solver(self, left_state, right_state):
         # the culbert b. laney way!
         # step 1: compute primitives
-        left_state = self.unk[:, i]
-        right_state = self.unk[:, i + 1]
-        rho_l = self.unk[0, i]
-        rho_r = self.unk[0, i + 1]
+        rho_l = left_state[0]
+        rho_r = right_state[0]
         v_r, p_r, h_r = self.get_prim(left_state)
         v_l, p_l, h_l = self.get_prim(right_state)
 
@@ -114,7 +111,7 @@ class SimulationHydro(object):
         fl = left_state
         #
         for i in range(0, 3):
-            fl += rev[i, :] * np.max(ev[i], 0) * dv[i]
+            fl += rev[i, :] * np.max(self.ev[i], 0) * dv[i]
             # add solution to flux
 
     def get_max_speed(self):
