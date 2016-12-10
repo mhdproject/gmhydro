@@ -81,8 +81,8 @@ class SimulationHydro(object):
         # step 1: compute primitives
         rho_l = self.unk[0, i]
         rho_r = self.unk[0, i + 1]
-        v_r, p_r, h_r = get_prim(self.unk[i])
-        v_l, p_l, h_l = get_prim(self.unk[i + 1])
+        v_r, p_r, h_r = self.get_prim(self.unk[i])
+        v_l, p_l, h_l = self.get_prim(self.unk[i + 1])
 
         # step :2 roe averages
         srl = np.sqrt(rho_l)
