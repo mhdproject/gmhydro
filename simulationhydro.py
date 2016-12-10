@@ -67,23 +67,53 @@ class SimulationHydro(object):
         p = e_int * (self.gamma - 1)
         self.sound_speed = np.sqrt(self.gamma * p / rho)
 
+    def get_prim(self, unk):
+        rho_r = unk[0]
+        v_r = unk[1]
+        etot_r = unk[2]
+        esp_r = etot_r / rho_r
+        p_r = (self.gamma - 1) * (etot_r - (rho_r * v_r ^ 2) / 2)
+        h_r = (e_tot_r + p_r) / rho_r
+        return v_r, p_r, h_r
+
     def riemann_solver(self):
         # intermeditae_state
         # roe average
-        pl = prim[:, i]
-        pr = prim[:, i + 1]
-        roe_ave = np.sqrt(pl * pr)
-        rho_roe = roe_ave[0]
-        v_roe = roe_ave[1]
-        p_roe = roe_ave[2]
-        cs = np.sqrt(self.gamma * p_roe / rho_roe)
-        self.ev[0] = v_roe - cs
-        self.ev[1] = v_roe
-        self.ev[2] = v_roe + cs
+        # step 1: compute primitives
+        rho_l = self.unk[0, i]
+        rho_r = self.unk[0, i + 1]
+        v_r, p_r, h_r = get_prim(self.unk[i])
+        v_l, p_l, h_l = get_prim(self.unk[i + 1])
 
-        for i in range(0,3)
-            if (self.ev[i] < 0):
-                # add solution to flux
+        # step :2 roe averages
+        rho_roe = np.sqrt(rho_l * rho_r)
+        srl = np.sqrt(rho_l)
+        srr = np.sqrt(rho_r)
+        v_roe = (srr * v_r + srl * v_l) / (srl + srr)
+        h_roe = (srr * h_r + srl * h_l) / (srl + srr)
+        a_roe = np.sqrt((self.gamma - 1) * (h_roe - 0.5 * v_roe * v_roe))
+        a_roe2 = a_roe * a_roe
+        # step:3 compute eigenvalues
+        self.ev[0] = v_roe
+        self.ev[1] = v_roe + a_roe
+        self.ev[2] = v_roe - a_roe
+        # step:4 compute wave strengths
+        drho = rho_r - rho_l
+        dp = p_r - p_l
+        dv = v_r - v_l
+        dv[0] = drho - dp / a_roe2
+        dv[1] = dv + dp / (rho_roe * a_roe)
+        dv[2] = dv - dp / (rho_roe * a_roe)
+        # step:5 construct right characteristic eigenvectors
+        rev = np.empty([3, 3])
+        rev[0, :] = np.array([1, v_roe, 0.5 * v_roe * v_roe])
+        rev[1, :] = np.array([1, v_roe + a_roe, h_roe + a_roe * v_roe])
+        rev[2, :] = np.array([1, v_roe - a_roe, h_roe - a_roe * v_roe])
+        # Step 7: compute flux
+        fl = left
+        for i in range(0, 3):
+            fl += rev[i,:]*np.max(ev[i],0) *dv[i]
+        # add solution to flux
 
     def get_max_speed(self):
         self.get_sound_speed()
