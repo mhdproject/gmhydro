@@ -17,12 +17,13 @@ class Mesh(object):
 class SimulationHydro(object):
     def __init__(self):
         self.nx = 50
-        self.dx = 1 / self.nx
-        self.steps = 20
+        self.dx = 1. / self.nx
+        self.steps = 10
+        self.step = 0
         self.dtdx = 1.0
         self.nvar = 3
         self.cfl = 0.5
-        self.gamma = 5. / 3.
+        self.gamma = 7. / 5.
         self.unk = np.ndarray(shape=(self.nvar, self.nx), dtype=float)
         self.unk_n = np.empty_like(self.unk)
         self.flux = np.empty_like(self.unk)
@@ -60,7 +61,7 @@ class SimulationHydro(object):
 
     def get_max_speed(self):
         self.get_sound_speed()
-        max_speed = self.unk[1, :] + self.sound_speed
+        max_speed = np.abs(self.unk[1, :]) + self.sound_speed
         self.dt = max_speed.max() * self.dx
         self.dtdx = 1. / max_speed.max()
         pass
@@ -99,10 +100,11 @@ class SimulationHydro(object):
     def main_loop(self):
         info_str="a"
         self.set_initial_conditions()
-        for step in range(0, self.steps):
+        for self.step in range(0, self.steps):
             self.get_max_speed()
-            info_str = "Timestep" + str(step)
+            info_str = "Timestep =" + str(self.step)
             info_str += ", cfl=" + str (self.dtdx)
+            info_str += ", dt=%4.1e " % (self.dt)
             print(info_str)
             self.time_advance()
             self.plot_all()
@@ -112,11 +114,15 @@ class SimulationHydro(object):
         rho = self.unk[0, :]
         vel = self.unk[1, :] / rho
         p = self.unk[2, :]
+        self.ax1.cla()
         pts = self.ax1.plot(rho)
+        self.ax2.cla()
         pts = self.ax2.plot(vel)
+        self.ax3.cla()
         pts = self.ax3.plot(p)
         plt.pause(0.05)
         self.fig.canvas.draw()
+        plt.savefig('output'+str(self.step)+'.png')
 
 
 if __name__ == '__main__':
