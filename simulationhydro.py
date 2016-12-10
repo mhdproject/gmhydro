@@ -77,8 +77,7 @@ class SimulationHydro(object):
         return v_r, p_r, h_r
 
     def riemann_solver(self):
-        # intermeditae_state
-        # roe average
+        # the culbert b. laney way!
         # step 1: compute primitives
         rho_l = self.unk[0, i]
         rho_r = self.unk[0, i + 1]
@@ -86,9 +85,9 @@ class SimulationHydro(object):
         v_l, p_l, h_l = get_prim(self.unk[i + 1])
 
         # step :2 roe averages
-        rho_roe = np.sqrt(rho_l * rho_r)
         srl = np.sqrt(rho_l)
         srr = np.sqrt(rho_r)
+        rho_roe = srl*srr
         v_roe = (srr * v_r + srl * v_l) / (srl + srr)
         h_roe = (srr * h_r + srl * h_l) / (srl + srr)
         a_roe = np.sqrt((self.gamma - 1) * (h_roe - 0.5 * v_roe * v_roe))
@@ -112,8 +111,8 @@ class SimulationHydro(object):
         # Step 7: compute flux
         fl = left
         for i in range(0, 3):
-            fl += rev[i,:]*np.max(ev[i],0) *dv[i]
-        # add solution to flux
+            fl += rev[i, :] * np.max(ev[i], 0) * dv[i]
+            # add solution to flux
 
     def get_max_speed(self):
         self.get_sound_speed()
