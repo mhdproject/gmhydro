@@ -79,10 +79,12 @@ class SimulationHydro(object):
     def riemann_solver(self):
         # the culbert b. laney way!
         # step 1: compute primitives
+        left_state=self.unk[:,i]
+        right_state=self.unk[:,i+1]
         rho_l = self.unk[0, i]
         rho_r = self.unk[0, i + 1]
-        v_r, p_r, h_r = self.get_prim(self.unk[i])
-        v_l, p_l, h_l = self.get_prim(self.unk[i + 1])
+        v_r, p_r, h_r = self.get_prim(left_state)
+        v_l, p_l, h_l = self.get_prim(right_state)
 
         # step :2 roe averages
         srl = np.sqrt(rho_l)
@@ -109,7 +111,7 @@ class SimulationHydro(object):
         rev[1, :] = np.array([1, v_roe + a_roe, h_roe + a_roe * v_roe])
         rev[2, :] = np.array([1, v_roe - a_roe, h_roe - a_roe * v_roe])
         # Step 7: compute flux
-        fl = left
+        fl = left_state
         for i in range(0, 3):
             fl += rev[i, :] * np.max(ev[i], 0) * dv[i]
             # add solution to flux
