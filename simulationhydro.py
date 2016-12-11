@@ -19,7 +19,7 @@ class SimulationHydro(object):
         self.grid = ComputationalGrid()
         # self.grid.nx = 50
         self.dx = 1. / self.grid.nx
-        self.steps = 1
+        self.steps = 3
         self.step = 0
         self.dtdx = 1.0
         self.nvar = 3
@@ -30,6 +30,7 @@ class SimulationHydro(object):
         self.flux = np.empty_like(self.unk)
         self.ev = np.ndarray(shape=(3), dtype=float)
         self.dv = np.empty_like(self.ev)
+        self.fl = np.empty_like(self.ev)
         self.sound_speed = np.empty_like(self.unk)
         print("test")
         self.plotter = DataPlotter()
@@ -93,8 +94,6 @@ class SimulationHydro(object):
         drho = rho_r - rho_l
         dp = p_r - p_l
         dvel = v_r - v_l
-        if (drho != 0):
-            print(rho_r, rho_l)
         self.dv[0] = drho - dp / a_roe2
         self.dv[1] = dvel + dp / (rho_roe * a_roe)
         self.dv[2] = dvel - dp / (rho_roe * a_roe)
@@ -104,12 +103,24 @@ class SimulationHydro(object):
         rev[1, :] = np.array([1, v_roe + a_roe, h_roe + a_roe * v_roe])
         rev[2, :] = np.array([1, v_roe - a_roe, h_roe - a_roe * v_roe])
         # Step 7: compute flux
-        fl = left_state
+        self.fl = self.get_flux(left_state)
         #
+        if (drho != 0):
+            print('rho', rho_r, rho_l)
+            print('p', p_r, p_l)
+            print('v', v_r, v_l)
+            print('roe', a_roe, v_roe, rho_roe, h_roe)
+            print('ev', self.ev)
+            print('eigenstrength', self.dv)
+            print('eigenstrength', drho, dp, a_roe2)
+            print('rev', rev)
+            print('self.fl', self.fl)
         for i in range(0, 3):
-            fl += rev[i, :] * np.max(self.ev[i], 0) * self.dv[i]
-            # add solution to flux
-        return fl
+            # self.fl += rev[i, :] * np.minimum(self.ev[i], 0) * self.dv[i]
+            if (drho != 0):
+                print(self.fl[0], rev[i, 0], self.ev[i], self.dv[i])
+                # add solution to flux
+        return self.fl
 
     def get_max_speed(self):
         self.get_sound_speed()
@@ -125,23 +136,25 @@ class SimulationHydro(object):
         e_int = self.unk[2, :] - ke
         p = e_int * (self.gamma - 1)
 
-    def get_flux(self):
-        rho = self.unk[0, :]
-        v1 = self.unk[1, :] / rho
+    def get_flux(self, u):
+        rho = u[0]
+        v1 = u[1] / rho
         ke = 0.5 * rho * v1 * v1
-        e_int = self.unk[2, :] - ke
+        e_int = u[2] - ke
         p = e_int * (self.gamma - 1)
         e_tot = ke + e_int
-        self.flux[0, :] = rho * v1
-        self.flux[1, :] = rho * v1 * v1 + p
-        self.flux[2, :] = v1 * (p + e_tot)
+        fl = np.empty_like(self.ev)
+        fl[0] = rho * v1
+        fl[1] = rho * v1 * v1 + p
+        fl[2] = v1 * (p + e_tot)
+        return fl
 
     def boundary_conditions(self):
         self.unk_n[:, 0] = self.unk[:, 1]
         self.unk_n[:, -1] = self.unk[:, -2]
 
     def time_advance(self):
-        self.get_flux()
+        # self.get_flux()
         for i in range(1, self.grid.nx - 1):
             leftstate = self.unk[:, i - 1]
             rightstate = self.unk[:, i]
@@ -154,7 +167,6 @@ class SimulationHydro(object):
 
             self.unk_n[:, i] = self.unk[:, i] - self.cfl * self.dtdx * (
                 fl2 - fl1)
-
 
         self.boundary_conditions()
         self.unk = self.unk_n
