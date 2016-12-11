@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 from __future__ import print_function
-import numpy as np
+
 import matplotlib
+import numpy as np
 
 matplotlib.use('macosx')
 
@@ -18,7 +19,7 @@ class SimulationHydro(object):
         self.grid = ComputationalGrid()
         # self.grid.nx = 50
         self.dx = 1. / self.grid.nx
-        self.steps = 10
+        self.steps = 1
         self.step = 0
         self.dtdx = 1.0
         self.nvar = 3
@@ -27,6 +28,8 @@ class SimulationHydro(object):
         self.unk = np.ndarray(shape=(self.nvar, self.grid.nx), dtype=float)
         self.unk_n = np.empty_like(self.unk)
         self.flux = np.empty_like(self.unk)
+        self.ev = np.ndarray(shape=(3), dtype=float)
+        self.dv = np.empty_like(self.ev)
         self.sound_speed = np.empty_like(self.unk)
         print("test")
         self.plotter = DataPlotter()
@@ -62,7 +65,7 @@ class SimulationHydro(object):
         rho_r = unk[0]
         v_r = unk[1]
         etot_r = unk[2]
-        p_r = (self.gamma - 1) * (etot_r - (rho_r * v_r ^ 2) / 2)
+        p_r = (self.gamma - 1) * (etot_r - (rho_r * v_r * v_r) / 2)
         h_r = (etot_r + p_r) / rho_r
         return v_r, p_r, h_r
 
@@ -89,10 +92,12 @@ class SimulationHydro(object):
         # step:4 compute wave strengths
         drho = rho_r - rho_l
         dp = p_r - p_l
-        dv = v_r - v_l
-        dv[0] = drho - dp / a_roe2
-        dv[1] = dv + dp / (rho_roe * a_roe)
-        dv[2] = dv - dp / (rho_roe * a_roe)
+        dvel = v_r - v_l
+        if (drho != 0):
+            print(rho_r, rho_l)
+        self.dv[0] = drho - dp / a_roe2
+        self.dv[1] = dvel + dp / (rho_roe * a_roe)
+        self.dv[2] = dvel - dp / (rho_roe * a_roe)
         # step:5 construct right characteristic eigenvectors
         rev = np.empty([3, 3])
         rev[0, :] = np.array([1, v_roe, 0.5 * v_roe * v_roe])
@@ -102,8 +107,9 @@ class SimulationHydro(object):
         fl = left_state
         #
         for i in range(0, 3):
-            fl += rev[i, :] * np.max(self.ev[i], 0) * dv[i]
+            fl += rev[i, :] * np.max(self.ev[i], 0) * self.dv[i]
             # add solution to flux
+        return fl
 
     def get_max_speed(self):
         self.get_sound_speed()
@@ -137,8 +143,18 @@ class SimulationHydro(object):
     def time_advance(self):
         self.get_flux()
         for i in range(1, self.grid.nx - 1):
-            self.unk_n[:, i] = 0.5 * (self.unk[:, i - 1] + self.unk[:, i + 1]) - self.cfl * self.dtdx * (
-                self.flux[:, i + 1] - self.flux[:, i - 1])
+            leftstate = self.unk[:, i - 1]
+            rightstate = self.unk[:, i]
+            fl1 = self.riemann_solver(leftstate, rightstate)
+            leftstate = self.unk[:, i]
+            rightstate = self.unk[:, i + 1]
+            fl2 = self.riemann_solver(leftstate, rightstate)
+            # self.unk_n[:, i] = 0.5 * (self.unk[:, i - 1] + self.unk[:, i + 1]) - self.cfl * self.dtdx * (
+            #     self.flux[:, i + 1] - self.flux[:, i - 1])
+
+            self.unk_n[:, i] = self.unk[:, i] - self.cfl * self.dtdx * (
+                fl2 - fl1)
+
 
         self.boundary_conditions()
         self.unk = self.unk_n
