@@ -8,18 +8,9 @@ matplotlib.use('macosx')
 import matplotlib.pyplot as plt
 import time
 
+from ComputationalGrid import ComputationalGrid
 
-class ComputationalGrid(object):
-    def __init__(self):
-        self.nx = 50
-
-
-class DataPlotter(object):
-    def __init__(self):
-        self.fig, (self.ax1, self.ax2, self.ax3) = plt.subplots(3, 1)
-        plt.show(False)
-        plt.draw()
-        pass
+from DataPlotter import DataPlotter
 
 
 class SimulationHydro(object):
