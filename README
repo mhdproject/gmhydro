@@ -1,1 +1,5 @@
-class exercise hydro simulation with python
+Test implementatyion of 1D Sod shock tube, using
+1) lax-friedrichs flux and
+2) godunov's method with  roe solver
+
+Inline graphics using matplotlib
