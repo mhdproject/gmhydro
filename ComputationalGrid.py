@@ -2,4 +2,4 @@
 
 class ComputationalGrid(object):
     def __init__(self):
-        self.nx = 50
+        self.nx = 500

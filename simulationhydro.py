@@ -21,9 +21,11 @@ class SimulationHydro(object):
         self.grid = ComputationalGrid()
         # self.grid.nx = 50
         self.dx = 1. / self.grid.nx
-        self.steps = 4
+        self.steps = 4000
         self.step = 0
         self.dtdx = 1.0
+        self.t = 0
+        self.tend = 0.2
         self.dt = 1.0
         self.nvar = 3
         self.cfl = 0.5
@@ -34,6 +36,7 @@ class SimulationHydro(object):
         self.ev = np.ndarray(shape=3, dtype=float)
         self.dv = np.empty_like(self.ev)
         self.fl = np.empty_like(self.ev)
+        self.debug = 0
         self.sound_speed = np.empty_like(self.unk)
         print("test")
         self.plotter = DataPlotter()
@@ -66,13 +69,26 @@ class SimulationHydro(object):
         p = e_int * (self.gamma - 1)
         self.sound_speed = np.sqrt(self.gamma * p / rho)
 
-    def get_prim(self, unk):
-        rho_r = unk[0]
-        u_r = unk[1] / rho_r
-        etot_r = unk[2]
-        p_r = (self.gamma - 1) * (etot_r - (rho_r * u_r * u_r) / 2)
-        h_r = (etot_r + p_r) / rho_r
-        return u_r, p_r, h_r
+    def get_prim(self, con):
+        rho = con[0]
+        mom = con[1]
+        etot = con[2]
+        v = mom / rho
+        ke = 0.5 * rho * v ** 2
+        p = (self.gamma - 1) * (etot - ke)
+        h = (etot + p) / rho
+        return v, p, h
+
+    def get_flux(self, u):
+        v, p, h = self.get_prim(u)
+        rho = u[0]
+        e_tot = u[2]
+
+        fl = np.empty_like(self.ev)
+        fl[0] = rho * v
+        fl[1] = rho * v ** 2 + p
+        fl[2] = v * (p + e_tot)
+        return fl
 
     def riemann_solver(self, left_state, right_state):
         # the culbert b. laney way!
@@ -107,9 +123,9 @@ class SimulationHydro(object):
         rev[1, :] = (rho_RL / 2 / a_RL) * np.array([1, u_RL + a_RL, h_RL + a_RL * u_RL])
         rev[2, :] = (-rho_RL / 2 / a_RL) * np.array([1, u_RL - a_RL, h_RL - a_RL * u_RL])
         # Step 7: compute flux
-        self.fl = self.get_flux(left_state)
+        self.fl = 0.5 * (self.get_flux(left_state) + self.get_flux(right_state))
         #
-        if (drho != 0):
+        if (self.debug == 1):
             print('rho', rho_l, rho_r)
             print('p', p_l, p_r)
             print('v', u_l, u_r)
@@ -123,8 +139,8 @@ class SimulationHydro(object):
             print('rev', rev)
             print('self.fl', self.fl)
         for i in range(0, 3):
-            self.fl += rev[i, :] * np.minimum(self.ev[i], 0) * self.dv[i]
-            if (drho != 0):
+            self.fl -= 0.5 * rev[i, :] * np.abs(self.ev[i]) * self.dv[i]
+            if (self.debug == 1):
                 print(self.fl[0], rev[i, 0], self.ev[i], self.dv[i])
                 # add solution to flux
         return self.fl
@@ -135,20 +151,6 @@ class SimulationHydro(object):
         self.dt = max_speed.max() * self.dx
         self.dtdx = 1. / max_speed.max()
         pass
-
-
-    def get_flux(self, u):
-        rho = u[0]
-        v1 = u[1] / rho
-        ke = 0.5 * rho * v1 * v1
-        e_int = u[2] - ke
-        p = e_int * (self.gamma - 1)
-        e_tot = ke + e_int
-        fl = np.empty_like(self.ev)
-        fl[0] = rho * v1
-        fl[1] = rho * v1 ** 2 + p
-        fl[2] = v1 * (p + e_tot)
-        return fl
 
     def boundary_conditions(self):
         self.unk_n[:, 0] = self.unk[:, 1]
@@ -184,12 +186,17 @@ class SimulationHydro(object):
             info_str = "Timestep =" + str(self.step)
             info_str += ", cfl=" + str(self.dtdx)
             info_str += ", dt=%4.1e " % self.dt
+            info_str += ", t=%4.1e " % self.t
             print(info_str)
+            self.t += self.dt
+            if (self.t > self.tend):
+                sys.exit("End of simulation")
             self.time_advance()
             self.plot_all()
         pass
 
     def plot_all(self):
+
         rho = self.unk_n[0, :]
         vel = self.unk_n[1, :] / rho
         p = self.unk_n[2, :] - .5 * rho * vel ** 2
