@@ -59,7 +59,7 @@ class SimulationHydro(object):
 
     def get_sound_speed(self):
         rho = self.unk[0, :]
-        vx = self.unk[1, :]
+        vx = self.unk[1, :] / rho
         ke = 0.5 * rho * vx * vx
         e_tot = self.unk[2, :]
         e_int = e_tot - ke
@@ -68,7 +68,7 @@ class SimulationHydro(object):
 
     def get_prim(self, unk):
         rho_r = unk[0]
-        u_r = unk[1]
+        u_r = unk[1] / rho_r
         etot_r = unk[2]
         p_r = (self.gamma - 1) * (etot_r - (rho_r * u_r * u_r) / 2)
         h_r = (etot_r + p_r) / rho_r
