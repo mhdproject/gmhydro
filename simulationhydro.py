@@ -87,7 +87,7 @@ class SimulationHydro(object):
         rho_roe = srl * srr
         v_roe = (srr * v_r + srl * v_l) / (srl + srr)
         h_roe = (srr * h_r + srl * h_l) / (srl + srr)
-        a_roe = np.sqrt((self.gamma - 1) * (h_roe - 0.5 * v_roe * v_roe))
+        a_roe = np.sqrt((self.gamma - 1) * (h_roe - 0.5 * v_roe ** 2))
         a_roe2 = a_roe * a_roe
         # step:3 compute eigenvalues
         self.ev[0] = v_roe
@@ -102,7 +102,7 @@ class SimulationHydro(object):
         self.dv[2] = dvel - dp / (rho_roe * a_roe)
         # step:5 construct right characteristic eigenvectors
         rev = np.empty([3, 3])
-        rev[0, :] = np.array([1, v_roe, 0.5 * v_roe * v_roe])
+        rev[0, :] = np.array([1, v_roe, 0.5 * v_roe ** 2])
         rev[1, :] = (rho_roe / 2 / a_roe) * np.array([1, v_roe + a_roe, h_roe + a_roe * v_roe])
         rev[2, :] = (-rho_roe / 2 / a_roe) * np.array([1, v_roe - a_roe, h_roe - a_roe * v_roe])
         # Step 7: compute flux
@@ -118,11 +118,11 @@ class SimulationHydro(object):
             print('h_roe', h_roe)
             print('ev', self.ev)
             print('eigenstrength', self.dv)
-            print('eigenstrength', drho, dp, a_roe2)
+            print('drho', drho, 'dp', dp, 'a_roe2', a_roe2)
             print('rev', rev)
             print('self.fl', self.fl)
         for i in range(0, 3):
-            # self.fl += rev[i, :] * np.minimum(self.ev[i], 0) * self.dv[i]
+            self.fl += rev[i, :] * np.minimum(self.ev[i], 0) * self.dv[i]
             if (drho != 0):
                 print(self.fl[0], rev[i, 0], self.ev[i], self.dv[i])
                 # add solution to flux
