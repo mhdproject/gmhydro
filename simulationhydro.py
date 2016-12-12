@@ -28,7 +28,7 @@ class SimulationHydro(object):
         self.tend = 0.2
         self.dt = 1.0
         self.nvar = 3
-        self.cfl = 0.5
+        self.cfl = 0.49
         self.gamma = 7. / 5.
         self.unk = np.ndarray(shape=(self.nvar, self.grid.nx), dtype=float)
         self.unk_n = np.empty_like(self.unk)
@@ -184,7 +184,7 @@ class SimulationHydro(object):
         for self.step in range(0, self.steps):
             self.get_max_speed()
             info_str = "Timestep =" + str(self.step)
-            info_str += ", cfl=" + str(self.dtdx)
+            info_str += ", cfl=%5.3f" % self.dtdx
             info_str += ", dt=%4.1e " % self.dt
             info_str += ", t=%4.1e " % self.t
             print(info_str)
@@ -199,15 +199,15 @@ class SimulationHydro(object):
 
         rho = self.unk_n[0, :]
         vel = self.unk_n[1, :] / rho
-        p = self.unk_n[2, :] - .5 * rho * vel ** 2
+        p = (self.gamma - 1) * (self.unk_n[2, :] - .5 * rho * vel ** 2)
         self.plotter.ax1.cla()
-        self.plotter.ax1.plot(rho)
+        self.plotter.ax1.plot(self.grid.x, rho, '-b')
         self.plotter.ax1.set_ylabel('rho')
         self.plotter.ax2.cla()
-        self.plotter.ax2.plot(vel)
+        self.plotter.ax2.plot(self.grid.x, vel, '-r')
         self.plotter.ax2.set_ylabel('v')
         self.plotter.ax3.cla()
-        self.plotter.ax3.plot(p)
+        self.plotter.ax3.plot(self.grid.x, p, '-g')
         self.plotter.ax3.set_ylabel('p')
         plt.pause(0.05)
         self.plotter.fig.canvas.draw()
