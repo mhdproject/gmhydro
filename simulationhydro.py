@@ -8,7 +8,6 @@ import numpy as np
 
 matplotlib.use('macosx')
 
-import matplotlib.pyplot as plt
 import time
 
 from ComputationalGrid import ComputationalGrid
@@ -192,26 +191,9 @@ class SimulationHydro(object):
             if (self.t > self.tend):
                 sys.exit("End of simulation")
             self.time_advance()
-            self.plot_all()
+            self.plotter.plot_all(self.unk_n, self.grid.x, self.step)
         pass
 
-    def plot_all(self):
-
-        rho = self.unk_n[0, :]
-        vel = self.unk_n[1, :] / rho
-        p = (self.gamma - 1) * (self.unk_n[2, :] - .5 * rho * vel ** 2)
-        self.plotter.ax1.cla()
-        self.plotter.ax1.plot(self.grid.x, rho, '-b')
-        self.plotter.ax1.set_ylabel('rho')
-        self.plotter.ax2.cla()
-        self.plotter.ax2.plot(self.grid.x, vel, '-r')
-        self.plotter.ax2.set_ylabel('v')
-        self.plotter.ax3.cla()
-        self.plotter.ax3.plot(self.grid.x, p, '-g')
-        self.plotter.ax3.set_ylabel('p')
-        plt.pause(0.05)
-        self.plotter.fig.canvas.draw()
-        plt.savefig('output/output' + str(self.step).zfill(5) + '.png')
 
 
 if __name__ == '__main__':

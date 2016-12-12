@@ -1,6 +1,3 @@
-
-
-
 import matplotlib
 
 matplotlib.use('macosx')
@@ -13,3 +10,20 @@ class DataPlotter(object):
         plt.show(False)
         plt.draw()
         pass
+
+    def plot_all(self, unk_n, xaxis, step):
+        rho = unk_n[0, :]
+        vel = unk_n[1, :] / rho
+        p = (unk_n[2, :] - .5 * rho * vel ** 2)
+        self.ax1.cla()
+        self.ax1.plot(xaxis, rho, '-b')
+        self.ax1.set_ylabel('rho')
+        self.ax2.cla()
+        self.ax2.plot(xaxis, vel, '-r')
+        self.ax2.set_ylabel('v')
+        self.ax3.cla()
+        self.ax3.plot(xaxis, p, '-g')
+        self.ax3.set_ylabel('p')
+        plt.pause(0.05)
+        self.fig.canvas.draw()
+        plt.savefig('output/output' + str(step).zfill(5) + '.png')
