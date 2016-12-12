@@ -88,8 +88,8 @@ class SimulationHydro(object):
         rho_RL = srl * srr
         u_RL = (srr * u_r + srl * u_l) / (srl + srr)
         h_RL = (srr * h_r + srl * h_l) / (srl + srr)
-        a_RL = np.sqrt((self.gamma - 1) * (h_RL - 0.5 * u_RL ** 2))
-        a_RL2 = a_RL * a_RL
+        a_RL2 = (self.gamma - 1) * (h_RL - 0.5 * u_RL ** 2)
+        a_RL = np.sqrt(a_RL2)
         # step:3 compute eigenvalues
         self.ev[0] = u_RL
         self.ev[1] = u_RL + a_RL
