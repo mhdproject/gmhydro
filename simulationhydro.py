@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 from __future__ import print_function
 
+import sys
+
 import matplotlib
 import numpy as np
 
@@ -19,7 +21,7 @@ class SimulationHydro(object):
         self.grid = ComputationalGrid()
         # self.grid.nx = 50
         self.dx = 1. / self.grid.nx
-        self.steps = 3
+        self.steps = 4
         self.step = 0
         self.dtdx = 1.0
         self.nvar = 3
@@ -41,17 +43,18 @@ class SimulationHydro(object):
 
     def set_initial_conditions(self):
         nx = self.grid.nx
-        rho = 1.
-        vx = 0
-        p = 1.
-        pr = p / 10.
-        ke = 0.5 * rho * vx * vx
-        self.unk[0, 0:nx / 2] = rho
-        self.unk[1, 0:nx / 2] = rho * vx
-        self.unk[2, 0:nx / 2] = ke + p / (self.gamma - 1)
-        self.unk[0, nx / 2:] = 0.125
-        self.unk[1, nx / 2:] = rho * vx
-        self.unk[2, nx / 2:] = ke + pr / (self.gamma - 1)
+        rho_l = 1.
+        p_l = 1.
+        v_l = 0
+        rho_r = 0.125
+        p_r = 0.1
+        v_r = 0
+        self.unk[0, 0:nx / 2] = rho_l
+        self.unk[1, 0:nx / 2] = rho_l * v_l
+        self.unk[2, 0:nx / 2] = 0.5 * rho_l * v_l ** 2 + p_l / (self.gamma - 1)
+        self.unk[0, nx / 2:] = rho_r
+        self.unk[1, nx / 2:] = rho_r * v_r
+        self.unk[2, nx / 2:] = 0.5 * rho_r * v_r ** 2 + p_r / (self.gamma - 1)
 
     def get_sound_speed(self):
         rho = self.unk[0, :]
@@ -75,8 +78,8 @@ class SimulationHydro(object):
         # step 1: compute primitives
         rho_l = left_state[0]
         rho_r = right_state[0]
-        v_r, p_r, h_r = self.get_prim(left_state)
-        v_l, p_l, h_l = self.get_prim(right_state)
+        v_l, p_l, h_l = self.get_prim(left_state)
+        v_r, p_r, h_r = self.get_prim(right_state)
 
         # step :2 roe averages
         srl = np.sqrt(rho_l)
@@ -100,16 +103,19 @@ class SimulationHydro(object):
         # step:5 construct right characteristic eigenvectors
         rev = np.empty([3, 3])
         rev[0, :] = np.array([1, v_roe, 0.5 * v_roe * v_roe])
-        rev[1, :] = np.array([1, v_roe + a_roe, h_roe + a_roe * v_roe])
-        rev[2, :] = np.array([1, v_roe - a_roe, h_roe - a_roe * v_roe])
+        rev[1, :] = (rho_roe / 2 / a_roe) * np.array([1, v_roe + a_roe, h_roe + a_roe * v_roe])
+        rev[2, :] = (-rho_roe / 2 / a_roe) * np.array([1, v_roe - a_roe, h_roe - a_roe * v_roe])
         # Step 7: compute flux
         self.fl = self.get_flux(left_state)
         #
         if (drho != 0):
-            print('rho', rho_r, rho_l)
-            print('p', p_r, p_l)
-            print('v', v_r, v_l)
-            print('roe', a_roe, v_roe, rho_roe, h_roe)
+            print('rho', rho_l, rho_r)
+            print('p', p_l, p_r)
+            print('v', v_l, v_r)
+            print('a_roe', a_roe)
+            print('rho_roe', rho_roe)
+            print('v_roe', v_roe)
+            print('h_roe', h_roe)
             print('ev', self.ev)
             print('eigenstrength', self.dv)
             print('eigenstrength', drho, dp, a_roe2)
@@ -168,6 +174,11 @@ class SimulationHydro(object):
             self.unk_n[:, i] = self.unk[:, i] - self.cfl * self.dtdx * (
                 fl2 - fl1)
 
+            rho = self.unk_n[0, i]
+            if (rho < 0):
+                print("Negative density")
+                sys.exit()
+
         self.boundary_conditions()
         self.unk = self.unk_n
 
@@ -185,9 +196,9 @@ class SimulationHydro(object):
         pass
 
     def plot_all(self):
-        rho = self.unk[0, :]
-        vel = self.unk[1, :] / rho
-        p = self.unk[2, :]
+        rho = self.unk_n[0, :]
+        vel = self.unk_n[1, :] / rho
+        p = self.unk_n[2, :]
         self.plotter.ax1.cla()
         pts = self.plotter.ax1.plot(rho)
         self.plotter.ax2.cla()
