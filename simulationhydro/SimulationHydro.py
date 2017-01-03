@@ -40,7 +40,7 @@ class SimulationHydro(object):
         print("test")
         self.plotter = DataPlotter()
 
-        self.main_loop()
+        # self.main_loop()
         time.sleep(10)
         pass
 
