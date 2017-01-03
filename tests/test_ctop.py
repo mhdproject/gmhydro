@@ -4,8 +4,8 @@ from .context import SimulationHydro
 import numpy.testing as npt
 
 
-class TestThing(unittest.TestCase):
-    def test_thing(self):
+class TestBasic(unittest.TestCase):
+    def test_cons_to_primitive(self):
         a = SimulationHydro.SimulationHydro()
         testprim = [0, 0.4, 1.4]
         con = [1, 0, 1]
