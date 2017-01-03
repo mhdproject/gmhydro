@@ -1,8 +1,19 @@
 import matplotlib
 
-matplotlib.use('macosx')
+from sys import platform
+
+matplotlib.use('TkAgg')
+if platform == "linux" or platform == "linux2":
+    matplotlib.use('TkAgg')
+    # linux
+elif platform == "darwin":
+    matplotlib.use('macosx')
+    # OS X
+elif platform == "win32":
+    matplotlib.use('TkAgg')
 
 import matplotlib.pyplot as plt
+
 
 class DataPlotter(object):
     def __init__(self):

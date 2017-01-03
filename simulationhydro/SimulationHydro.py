@@ -3,26 +3,18 @@ from __future__ import print_function
 
 import sys
 
-import matplotlib
 import numpy as np
-
-from sys import platform
-
-if platform == "linux" or platform == "linux2":
-    matplotlib.use('TkAgg')
-    # linux
-elif platform == "darwin":
-    matplotlib.use('macosx')
-    # OS X
-elif platform == "win32":
-    matplotlib.use('TkAgg')
-# Windows...
-
-# import time
 
 from ComputationalGrid import ComputationalGrid
 
 from DataPlotter import DataPlotter
+
+
+
+# Windows...
+
+# import time
+
 
 
 class SimulationHydro(object):
