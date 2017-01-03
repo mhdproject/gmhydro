@@ -6,9 +6,19 @@ import sys
 import matplotlib
 import numpy as np
 
-matplotlib.use('macosx')
+from sys import platform
 
-import time
+if platform == "linux" or platform == "linux2":
+    matplotlib.use('TkAgg')
+    # linux
+elif platform == "darwin":
+    matplotlib.use('macosx')
+    # OS X
+elif platform == "win32":
+    matplotlib.use('TkAgg')
+# Windows...
+
+# import time
 
 from ComputationalGrid import ComputationalGrid
 
@@ -41,7 +51,6 @@ class SimulationHydro(object):
         self.plotter = DataPlotter()
 
         # self.main_loop()
-        time.sleep(10)
         pass
 
     def set_initial_conditions(self):
@@ -198,3 +207,4 @@ class SimulationHydro(object):
 if __name__ == '__main__':
     a = SimulationHydro()
     a.main_loop()
+    # time.sleep(10)
