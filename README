@@ -1,5 +1,5 @@
-Test implementatyion of 1D Sod shock tube, using
+Test implementation of 1D Sod shock tube, using
 1) lax-friedrichs flux and
-2) godunov's method with  roe solver
+2) Godunov's method with  roe solver
 
 Inline graphics using matplotlib
