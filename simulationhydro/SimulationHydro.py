@@ -10,12 +10,7 @@ from simulationhydro.ComputationalGrid import ComputationalGrid
 from simulationhydro.DataPlotter import DataPlotter
 
 
-
-# Windows...
-
 # import time
-
-
 
 class SimulationHydro(object):
     def __init__(self):
