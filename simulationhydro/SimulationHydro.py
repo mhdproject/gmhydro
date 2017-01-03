@@ -5,9 +5,9 @@ import sys
 
 import numpy as np
 
-from ComputationalGrid import ComputationalGrid
+from simulationhydro.ComputationalGrid import ComputationalGrid
 
-from DataPlotter import DataPlotter
+from simulationhydro.DataPlotter import DataPlotter
 
 
 
