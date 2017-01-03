@@ -195,6 +195,6 @@ class SimulationHydro(object):
         pass
 
 
-
 if __name__ == '__main__':
     a = SimulationHydro()
+    a.main_loop()
