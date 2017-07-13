@@ -1,7 +1,0 @@
-Test implementation of 1D Sod shock tube, using
-1) lax-friedrichs flux and
-2) Godunov's method with  roe solver
-
-Inline graphics using matplotlib
-
-Codacy Badge
