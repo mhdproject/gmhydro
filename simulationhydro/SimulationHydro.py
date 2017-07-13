@@ -142,7 +142,6 @@ class SimulationHydro(object):
         max_speed = np.abs(self.unk[1, :]) + self.sound_speed
         self.dt = max_speed.max() * self.dx
         self.dtdx = 1. / max_speed.max()
-        pass
 
     def boundary_conditions(self):
         self.unk_n[:, 0] = self.unk[:, 1]
