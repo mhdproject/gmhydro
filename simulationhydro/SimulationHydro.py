@@ -37,9 +37,6 @@ class SimulationHydro(object):
         print("test")
         self.plotter = DataPlotter()
 
-        # self.main_loop()
-        pass
-
     def set_initial_conditions(self):
         nx = self.grid.nx
         rho_l = 1.

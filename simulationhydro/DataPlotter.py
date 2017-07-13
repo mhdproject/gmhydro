@@ -20,7 +20,6 @@ class DataPlotter(object):
         self.fig, (self.ax1, self.ax2, self.ax3) = plt.subplots(3, sharex=True)
         plt.show(False)
         plt.draw()
-        pass
 
     def plot_all(self, unk_n, xaxis, step):
         rho = unk_n[0, :]
