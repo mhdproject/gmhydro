@@ -44,12 +44,13 @@ class SimulationHydro(object):
         rho_r = 0.125
         p_r = 0.1
         u_r = 0
-        self.unk[0, 0:nx / 2] = rho_l
-        self.unk[1, 0:nx / 2] = rho_l * u_l
-        self.unk[2, 0:nx / 2] = 0.5 * rho_l * u_l ** 2 + p_l / (self.gamma - 1)
-        self.unk[0, nx / 2:] = rho_r
-        self.unk[1, nx / 2:] = rho_r * u_r
-        self.unk[2, nx / 2:] = 0.5 * rho_r * u_r ** 2 + p_r / (self.gamma - 1)
+        n_half = nx//2
+        self.unk[0, 0:n_half] = rho_l
+        self.unk[1, 0:n_half] = rho_l * u_l
+        self.unk[2, 0:n_half] = 0.5 * rho_l * u_l ** 2 + p_l / (self.gamma - 1)
+        self.unk[0, n_half:] = rho_r
+        self.unk[1, n_half:] = rho_r * u_r
+        self.unk[2, n_half:] = 0.5 * rho_r * u_r ** 2 + p_r / (self.gamma - 1)
 
     def get_sound_speed(self):
         rho = self.unk[0, :]
