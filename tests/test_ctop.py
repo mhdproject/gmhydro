@@ -8,7 +8,8 @@ from .context import SimulationHydro
 
 
 class TestBasic(unittest.TestCase):
-    def test_cons_to_primitive(self):
+    @staticmethod
+    def test_cons_to_primitive():
         a = SimulationHydro.SimulationHydro()
         test_primitive = [0, 0.4, 1.4]
         con = [1, 0, 1]
@@ -16,7 +17,8 @@ class TestBasic(unittest.TestCase):
         print(prim)
         npt.assert_allclose(prim, test_primitive, rtol=1e-5)
 
-    def test_riemann(self):
+    @staticmethod
+    def test_riemann():
         a = SimulationHydro.SimulationHydro()
         left = [1, 0.0, 1.4]
         right = left
