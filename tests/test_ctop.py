@@ -1,7 +1,8 @@
 import unittest
 
-from .context import SimulationHydro
 import numpy.testing as npt
+
+from .context import SimulationHydro
 
 
 class TestBasic(unittest.TestCase):
@@ -10,7 +11,7 @@ class TestBasic(unittest.TestCase):
         testprim = [0, 0.4, 1.4]
         con = [1, 0, 1]
         prim = a.get_prim(con)
-        print (prim)
+        print(prim)
         npt.assert_allclose(prim, testprim, rtol=1e-5)
 
     def test_riemann(self):
