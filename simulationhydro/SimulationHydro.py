@@ -184,7 +184,6 @@ class SimulationHydro(object):
                 sys.exit("End of simulation")
             self.time_advance()
             self.plotter.plot_all(self.unk_n, self.grid.x, self.step)
-        pass
 
 
 if __name__ == '__main__':
