@@ -6,7 +6,6 @@ import sys
 import numpy as np
 
 from simulationhydro.ComputationalGrid import ComputationalGrid
-
 from simulationhydro.DataPlotter import DataPlotter
 
 
@@ -117,7 +116,7 @@ class SimulationHydro(object):
         # Step 7: compute flux
         self.fl = 0.5 * (self.get_flux(left_state) + self.get_flux(right_state))
         #
-        if (self.debug == 1):
+        if self.debug == 1:
             print('rho', rho_l, rho_r)
             print('p', p_l, p_r)
             print('v', u_l, u_r)
@@ -132,7 +131,7 @@ class SimulationHydro(object):
             print('self.fl', self.fl)
         for i in range(0, 3):
             self.fl -= 0.5 * rev[i, :] * np.abs(self.ev[i]) * self.dv[i]
-            if (self.debug == 1):
+            if self.debug == 1:
                 print(self.fl[0], rev[i, 0], self.ev[i], self.dv[i])
                 # add solution to flux
         return self.fl
@@ -150,12 +149,12 @@ class SimulationHydro(object):
 
     def time_advance(self):
         for i in range(1, self.grid.nx - 1):
-            leftstate = self.unk[:, i - 1]
-            rightstate = self.unk[:, i]
-            fl1 = self.riemann_solver(leftstate, rightstate)
-            leftstate = self.unk[:, i]
-            rightstate = self.unk[:, i + 1]
-            fl2 = self.riemann_solver(leftstate, rightstate)
+            left_state = self.unk[:, i - 1]
+            right_state = self.unk[:, i]
+            fl1 = self.riemann_solver(left_state, right_state)
+            left_state = self.unk[:, i]
+            right_state = self.unk[:, i + 1]
+            fl2 = self.riemann_solver(left_state, right_state)
             # self.unk_n[:, i] = 0.5 * (self.unk[:, i - 1] + self.unk[:, i + 1]) - self.cfl * self.dtdx * (
             #     self.flux[:, i + 1] - self.flux[:, i - 1])
 
@@ -163,7 +162,7 @@ class SimulationHydro(object):
                 fl2 - fl1)
 
             rho = self.unk_n[0, i]
-            if (rho < 0):
+            if rho < 0:
                 print("Negative density")
                 sys.exit()
 
@@ -175,13 +174,13 @@ class SimulationHydro(object):
         self.set_initial_conditions()
         for self.step in range(0, self.steps):
             self.get_max_speed()
-            info_str = "Timestep =" + str(self.step)
+            info_str = "Time step =" + str(self.step)
             info_str += ", cfl=%5.3f" % self.dtdx
             info_str += ", dt=%4.1e " % self.dt
             info_str += ", t=%4.1e " % self.t
             print(info_str)
             self.t += self.dt
-            if (self.t > self.tend):
+            if self.t > self.tend:
                 sys.exit("End of simulation")
             self.time_advance()
             self.plotter.plot_all(self.unk_n, self.grid.x, self.step)

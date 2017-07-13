@@ -1,6 +1,6 @@
-import matplotlib
-
 from sys import platform
+
+import matplotlib
 
 matplotlib.use('TkAgg')
 if platform == "linux" or platform == "linux2":
