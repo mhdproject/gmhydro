@@ -36,4 +36,4 @@ class DataPlotter(object):
         self.ax3.set_ylabel('p')
         plt.pause(0.05)
         self.fig.canvas.draw()
-        plt.savefig('output/output' + str(step).zfill(5) + '.png')
+        plt.savefig('output' + str(step).zfill(5) + '.png')
