@@ -12,7 +12,7 @@ Inline graphics using matplotlib
 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/874c59d38f2642d1a2a213f6e36476d3)](https://www.codacy.com/app/garethcmurphy/gmhydro?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=garethcmurphy/gmhydro&amp;utm_campaign=Badge_Grade)
 
-
+[![Codacy Badge](https://api.codacy.com/project/badge/Coverage/874c59d38f2642d1a2a213f6e36476d3)](https://www.codacy.com/app/garethcmurphy/gmhydro?utm_source=github.com&utm_medium=referral&utm_content=garethcmurphy/gmhydro&utm_campaign=Badge_Coverage)
 ## Getting Started
 
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.

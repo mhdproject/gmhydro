@@ -16,7 +16,7 @@ class SimulationHydro(object):
         self.grid = ComputationalGrid()
         # self.grid.nx = 50
         self.dx = 1. / self.grid.nx
-        self.steps = 4000
+        self.steps = 10
         self.step = 0
         self.dtdx = 1.0
         self.t = 0
