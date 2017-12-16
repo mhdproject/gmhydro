@@ -8,7 +8,7 @@ Inline graphics using matplotlib
 
 ## Status
 
-[![Build Status](https://travis-ci.org/garethcmurphy/gmhydro.svg?branch=master)](https://travis-ci.org/garethcmurphy/gmhydro)
+[![Build Status](https://travis-ci.org/mhdproject/gmhydro.svg?branch=master)](https://travis-ci.org/mhdproject/gmhydro)
 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/874c59d38f2642d1a2a213f6e36476d3)](https://www.codacy.com/app/garethcmurphy/gmhydro?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=garethcmurphy/gmhydro&amp;utm_campaign=Badge_Grade)
 
